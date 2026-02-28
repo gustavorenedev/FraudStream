@@ -1,4 +1,5 @@
-﻿using FraudStream.Domain.ValueObjects;
+﻿using FraudStream.Domain.Entities;
+using FraudStream.Domain.ValueObjects;
 
 namespace FraudStream.Domain.Interfaces
 {
@@ -14,5 +15,4 @@ namespace FraudStream.Domain.Interfaces
         /// </summary>
         Task<ScoreBreakdown> EvaluateAsync(Transaction transaction, CancellationToken ct = default);
     }
-
 }
