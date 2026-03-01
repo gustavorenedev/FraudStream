@@ -1,0 +1,131 @@
+﻿name: fraudstream
+
+services:
+
+  # ── Infraestrutura ────────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: fraudstream-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       fraudstream
+      POSTGRES_USER:     fraud_user
+      POSTGRES_PASSWORD: fraud_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraud_user -d fraudstream"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: fraudstream-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: fraudstream-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  seq:
+    image: datalust/seq:latest
+    container_name: fraudstream-seq
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: Y
+    ports:
+      - "5341:5341"
+      - "8081:80"
+    volumes:
+      - seq_data:/data
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fraudstream-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER:     admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED:  "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Aplicação ─────────────────────────────────────────────────────────────────
+
+  api:
+    build:
+      context: ..       # raiz da solution (onde está o .sln)
+      dockerfile: src/FraudStream.Api/Dockerfile
+    container_name: fraudstream-api
+    restart: unless-stopped
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT:               Development
+      ConnectionStrings__Postgres:          "Host=postgres;Port=5432;Database=fraudstream;Username=fraud_user;Password=fraud_pass"
+      ConnectionStrings__Redis:             "redis:6379"
+      RabbitMq__Host:                       rabbitmq
+      RabbitMq__VHost:                      /
+      RabbitMq__Username:                   guest
+      RabbitMq__Password:                   guest
+      Serilog__WriteTo__1__Args__serverUrl: http://seq:5341
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # fraud-engine:
+  #   image: fraudstream.fraudengine
+
+  # audit-worker:
+  #   image: fraudstream.auditworker
+
+  # notification-worker:
+  #   image: fraudstream.notificationworker
+
+  # simulator:
+  #   image: fraudstream.simulator
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:
+  seq_data:
+  grafana_data:

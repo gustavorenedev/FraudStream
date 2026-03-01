@@ -1,5 +1,6 @@
 ﻿using FraudStream.Domain.Enums;
 using FraudStream.Domain.Exceptions;
+using System.Text.Json.Serialization;
 
 namespace FraudStream.Domain.ValueObjects
 {
@@ -9,27 +10,35 @@ namespace FraudStream.Domain.ValueObjects
     /// </summary>
     public sealed record ScoreBreakdown
     {
-        private readonly List<RuleResult> _results;
+        // JsonInclude expõe a propriedade pública para o serializador
+        // JsonPropertyName garante o nome correto no JSONB
+        [JsonInclude]
+        [JsonPropertyName("results")]
+        public IReadOnlyList<RuleResult> Results { get; private set; } = [];
 
-        public IReadOnlyList<RuleResult> Results => _results.AsReadOnly();
-        public int TotalScore => _results.Sum(r => r.Score);
-        public IEnumerable<RuleResult> TriggeredRules => _results.Where(r => r.Triggered);
+        [JsonIgnore]
+        public int TotalScore => Results.Sum(r => r.Score);
 
-        private ScoreBreakdown() => _results = []; // EF Core
+        [JsonIgnore]
+        public IEnumerable<RuleResult> TriggeredRules => Results.Where(r => r.Triggered);
 
-        public ScoreBreakdown(IEnumerable<RuleResult> results)
+        // Construtor para o System.Text.Json — recebe a lista diretamente pelo nome da propriedade
+        [JsonConstructor]
+        public ScoreBreakdown(IReadOnlyList<RuleResult> results)
         {
-            var list = results?.ToList() ?? throw new DomainException("Lista de resultados não pode ser nula.");
-            if (list.Count == 0)
+            if (results is null || results.Count == 0)
                 throw new DomainException("ScoreBreakdown deve conter ao menos um resultado.");
 
-            _results = list;
+            Results = results;
         }
 
-        /// <summary>
-        /// Determina o DecisionStatus com base no score total acumulado.
-        /// Thresholds configuráveis — aqui representados como constantes do domínio.
-        /// </summary>
+        // Construtor de domínio — aceita IEnumerable e converte para lista imutável
+        public ScoreBreakdown(IEnumerable<RuleResult> results)
+            : this((results ?? throw new DomainException("Lista de resultados não pode ser nula."))
+                  .ToList()
+                  .AsReadOnly())
+        { }
+
         public DecisionStatus ResolveDecision() => TotalScore switch
         {
             <= 30 => DecisionStatus.Approved,

@@ -9,7 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FraudStream.Application", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FraudStream.Infrastructure", "FraudStream.Infrastructure\FraudStream.Infrastructure.csproj", "{32D62839-D2DE-4D86-8EBC-99494E0CDFE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FraudStream.Api", "FraudStream.QueryApi\FraudStream.Api.csproj", "{804A7C51-065F-426B-B86F-7E6B9203B1EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FraudStream.Api", "FraudStream.Api\FraudStream.Api.csproj", "{DCAC39D4-22C7-40A6-850E-0592EF486D25}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{CFA8AE30-10E4-40FD-86C9-BB058E3469DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +31,14 @@ Global
 		{32D62839-D2DE-4D86-8EBC-99494E0CDFE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32D62839-D2DE-4D86-8EBC-99494E0CDFE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32D62839-D2DE-4D86-8EBC-99494E0CDFE1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{804A7C51-065F-426B-B86F-7E6B9203B1EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{804A7C51-065F-426B-B86F-7E6B9203B1EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{804A7C51-065F-426B-B86F-7E6B9203B1EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{804A7C51-065F-426B-B86F-7E6B9203B1EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCAC39D4-22C7-40A6-850E-0592EF486D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCAC39D4-22C7-40A6-850E-0592EF486D25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCAC39D4-22C7-40A6-850E-0592EF486D25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCAC39D4-22C7-40A6-850E-0592EF486D25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFA8AE30-10E4-40FD-86C9-BB058E3469DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFA8AE30-10E4-40FD-86C9-BB058E3469DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFA8AE30-10E4-40FD-86C9-BB058E3469DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFA8AE30-10E4-40FD-86C9-BB058E3469DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

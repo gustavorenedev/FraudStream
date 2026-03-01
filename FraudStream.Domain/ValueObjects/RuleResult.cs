@@ -1,5 +1,6 @@
 ﻿using FraudStream.Domain.Enums;
 using FraudStream.Domain.Exceptions;
+using System.Text.Json.Serialization;
 
 namespace FraudStream.Domain.ValueObjects
 {
@@ -9,14 +10,21 @@ namespace FraudStream.Domain.ValueObjects
     /// </summary>
     public sealed record RuleResult
     {
-        public RuleType Rule { get; }
-        public bool Triggered { get; }
-        public int Score { get; }
-        public string Reason { get; }
+        [JsonPropertyName("rule")]
+        public RuleType Rule { get; init; }
 
-        private RuleResult() { } // EF Core
+        [JsonPropertyName("triggered")]
+        public bool Triggered { get; init; }
 
-        private RuleResult(RuleType rule, bool triggered, int score, string reason)
+        [JsonPropertyName("score")]
+        public int Score { get; init; }
+
+        [JsonPropertyName("reason")]
+        public string Reason { get; init; } = string.Empty;
+
+        // JsonConstructor instrui o serializador a usar este construtor na desserialização
+        [JsonConstructor]
+        public RuleResult(RuleType rule, bool triggered, int score, string reason)
         {
             if (score < 0)
                 throw new DomainException($"Score da regra {rule} não pode ser negativo.");
@@ -27,15 +35,15 @@ namespace FraudStream.Domain.ValueObjects
             Reason = reason;
         }
 
-        /// <summary>Cria um resultado positivo: regra disparou e adiciona score.</summary>
         public static RuleResult Hit(RuleType rule, int score, string reason)
             => new(rule, triggered: true, score, reason);
 
-        /// <summary>Cria um resultado negativo: regra não disparou, score zero.</summary>
         public static RuleResult Miss(RuleType rule)
             => new(rule, triggered: false, score: 0, reason: "Regra não ativada.");
 
         public override string ToString()
-            => Triggered ? $"[HIT] {Rule}: +{Score} pts — {Reason}" : $"[MISS] {Rule}";
+            => Triggered
+                ? $"[HIT] {Rule}: +{Score} pts — {Reason}"
+                : $"[MISS] {Rule}";
     }
 }
